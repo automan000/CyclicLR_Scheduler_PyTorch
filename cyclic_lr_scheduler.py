@@ -34,8 +34,9 @@ class _LRScheduler(object):
 
 class CyclicLR(_LRScheduler):
 
-    def __init__(self, optimizer, max_lr, step_size, gamma=0.99, mode='triangular', last_epoch=-1):
+    def __init__(self, optimizer, base_lr, max_lr, step_size, gamma=0.99, mode='triangular', last_epoch=-1):
         self.optimizer = optimizer
+        self.base_lr = base_lr
         self.max_lr = max_lr
         self.step_size = step_size
         self.gamma = gamma
@@ -50,11 +51,11 @@ class CyclicLR(_LRScheduler):
             cycle = np.floor(1 + self.last_epoch / (2 * self.step_size))
             x = np.abs(float(self.last_epoch) / self.step_size - 2 * cycle + 1)
             if self.mode == 'triangular':
-                lr = base_lr + (self.max_lr - self.base_lr) * np.maximum(0, (1 - x))
+                lr = self.base_lr + (self.max_lr - self.base_lr) * np.maximum(0, (1 - x))
             elif self.mode == 'triangular2':
-                lr = base_lr + (self.max_lr - self.base_lr) * np.maximum(0, (1 - x)) / float(2 ** (cycle - 1))
+                lr = self.base_lr + (self.max_lr - self.base_lr) * np.maximum(0, (1 - x)) / float(2 ** (cycle - 1))
             elif self.mode == 'exp_range':
-                lr = base_lr + (self.max_lr - self.base_lr) * np.maximum(0, (1 - x)) * (self.gamma ** (
+                lr = self.base_lr + (self.max_lr - self.base_lr) * np.maximum(0, (1 - x)) * (self.gamma ** (
                     self.last_epoch))
             new_lr.append(lr)
         return new_lr
